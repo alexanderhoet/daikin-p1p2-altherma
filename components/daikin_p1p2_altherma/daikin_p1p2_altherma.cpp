@@ -6,6 +6,11 @@
 namespace esphome {
 namespace daikin_p1p2_altherma {
 
+// Global log to verify logging works at all
+extern "C" void app_main(void) {
+  printf("[GLOBAL] app_main() called!\n");
+}
+
 static const char *const TAG = "daikin_p1p2_altherma";
 
 // Forward declaration
@@ -34,6 +39,7 @@ void DaikinP1P2Altherma::loop() {
   if (p1p2_message_read(&rxmessage, 1) == P1P2_OK) {
     message_print(&rxmessage);
   }
+  ESP_LOGI(TAG, "Loop is running");
 }
 
 static void message_print(P1P2_Message_t *message) {
