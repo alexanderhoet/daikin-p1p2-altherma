@@ -6,11 +6,6 @@
 namespace esphome {
 namespace daikin_p1p2_altherma {
 
-// Global log to verify logging works at all
-extern "C" void app_main(void) {
-  printf("[GLOBAL] app_main() called!\n");
-}
-
 static const char *const TAG = "daikin_p1p2_altherma";
 
 // Forward declaration
