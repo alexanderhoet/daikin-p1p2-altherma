@@ -12,20 +12,25 @@ static const char *const TAG = "daikin_p1p2_altherma";
 static void message_print(P1P2_Message_t *message);
 
 void DaikinP1P2Altherma::setup() {
-  ESP_LOGI(TAG, "Initializing P1P2 RX engine");
+  ESP_LOGI(TAG, "Setting up Daikin P1P2");
 
-  // Replace with your GPIO pins
-  const int rx_pin = 34;
-  const int tx_pin = 33;
-  const int rst_pin = 32;
-
-  if (p1p2_serial_init(rx_pin, tx_pin, rst_pin) != P1P2_OK) {
-    ESP_LOGE(TAG, "Failed to initialize P1P2 serial, deinitializing");
-    p1p2_serial_deinit();
+  if (!rx_pin_ || !tx_pin_ || !rst_pin_) {
+    ESP_LOGE(TAG, "Pins not configured");
     return;
   }
 
-  ESP_LOGI(TAG, "P1P2 RX engine initialized");
+  const int rx = rx_pin_->get_pin();
+  const int tx = tx_pin_->get_pin();
+  const int rst = rst_pin_->get_pin();
+
+  ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx, tx, rst);
+
+  if (p1p2_serial_init(rx, tx, rst) != P1P2_OK) {
+    ESP_LOGE(TAG, "P1P2 serial init failed");
+    return;
+  }
+
+  ESP_LOGI(TAG, "P1P2 RX initialized");
 }
 
 void DaikinP1P2Altherma::loop() {
