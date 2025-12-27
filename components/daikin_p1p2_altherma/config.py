@@ -15,10 +15,5 @@ CONFIG_SCHEMA = cv.Schema(
 
 
 async def to_code(config):
-    cg.add_platformio_option(
-        "lib_deps",
-        "alexanderhoet/esp32-daikin-p1p2-serial"
-    )
-
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
