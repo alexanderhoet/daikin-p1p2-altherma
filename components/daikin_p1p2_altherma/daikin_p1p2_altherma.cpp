@@ -31,13 +31,11 @@ void DaikinP1P2Altherma::setup() {
 void DaikinP1P2Altherma::loop() {
   P1P2_Message_t rxmessage = {0};
 
-  // Non-blocking read (tick=1)
   if (p1p2_message_read(&rxmessage, 1) == P1P2_OK) {
     message_print(&rxmessage);
   }
 }
 
-// Helper function to print messages
 static void message_print(P1P2_Message_t *message) {
   char buffer[128] = {0};
   int offset = 0;
@@ -52,5 +50,5 @@ static void message_print(P1P2_Message_t *message) {
   ESP_LOGD(TAG, "%s", buffer);
 }
 
-}  // namespace daikin_p1p2_altherma
-}  // namespace esphome
+}
+}
