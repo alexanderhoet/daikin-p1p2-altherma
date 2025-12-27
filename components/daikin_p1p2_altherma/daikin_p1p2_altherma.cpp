@@ -15,9 +15,9 @@ void DaikinP1P2Altherma::setup() {
   ESP_LOGI(TAG, "Initializing P1P2 RX engine");
 
   // Replace with your GPIO pins
-  const int rx_pin = 32;
+  const int rx_pin = 34;
   const int tx_pin = 33;
-  const int rst_pin = 34;
+  const int rst_pin = 32;
 
   if (p1p2_serial_init(rx_pin, tx_pin, rst_pin) != P1P2_OK) {
     ESP_LOGE(TAG, "Failed to initialize P1P2 serial, deinitializing");
