@@ -1,3 +1,6 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include <esphome/core/log.h>
 
 #include "daikin_p1p2_serial.h"
@@ -10,6 +13,7 @@ namespace daikin_p1p2_altherma {
   static const char *const TAG = "daikin_p1p2_altherma";
 
 static void message_print(P1P2_Message_t *message);
+static void task_fn(void *arg);
 
 void DaikinP1P2Altherma::setup() {
   ESP_LOGI(TAG, "Setting up Daikin P1P2...");
@@ -30,6 +34,18 @@ void DaikinP1P2Altherma::setup() {
 
   ESP_LOGI(TAG, "P1P2 serial initialized successfully");
   this->initialized_ = true;
+
+
+  xTaskCreatePinnedToCore(
+      task_fn,
+      "my_task",
+      8192,
+      nullptr,
+      5,
+      nullptr,
+      1
+    );
+  }
 }
 
 void DaikinP1P2Altherma::dump_config() {
@@ -64,6 +80,14 @@ static void message_print(P1P2_Message_t *message) {
   }
 
   ESP_LOGD(TAG, "%s", buffer);
+}
+
+static void task_fn(void *arg) {
+  ESP_LOGI("my_task", "Started");
+  while (true) {
+    ESP_LOGI("my_task", "Running");
+    vTaskDelay(pdMS_TO_TICKS(1000));
+  }
 }
 
 }
