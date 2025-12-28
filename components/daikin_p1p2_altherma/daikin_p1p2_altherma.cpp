@@ -42,7 +42,7 @@ void DaikinP1P2Altherma::loop() {
   if (p1p2_message_read(&rxmessage, 1) == P1P2_OK) {
     message_print(&rxmessage);
   }
-  ESP_LOGI(TAG, "Loop is running");
+  //ESP_LOGI(TAG, "Loop is running");
 }
 
 static void message_print(P1P2_Message_t *message) {
