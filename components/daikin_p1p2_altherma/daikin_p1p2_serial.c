@@ -31,7 +31,7 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
-#include <esp_log.h>
+#include <esp_log.h>ESP_LOGD(TAG, "%s", buffer);
 #include <driver/gpio.h>
 #include <driver/gptimer.h>
 #include <hal/clk_tree_hal.h>
@@ -253,8 +253,10 @@ static void p1p2_serial_receive_task(void *argument)
   P1P2_Message_t rxmessage = {0};
 
   for(;;) {
+    ESP_LOGD("P1P2SERIAL", "Waiting for data...");
+
     /* Get a new byte off the receive queue */
-    if(xQueueReceive(rxqueue, &input, portMAX_DELAY) == pdPASS) {
+    if(xQueueReceive(rxqueue, &input, 1000) == pdPASS) {
       /* Check if the received byte indicates a message timeout */
       if(input != EOP_CHAR) {
         /* Process the received data byte and add it to the end of the current message */
@@ -447,6 +449,7 @@ static bool IRAM_ATTR baud_timer_handler(gptimer_handle_t timer, const gptimer_a
     if((inputbuffer & 0x3) == 0x1) {
       bitcounter = 2;
       serial_state = receiving;
+      ESP_LOGD("P1P2SERIAL", "Start receiving");
     } else if(xQueuePeekFromISR(txqueue, &outputbuffer) == pdTRUE) {
       bitcounter = 0;
       serial_state = transmitting;
@@ -463,6 +466,7 @@ static bool IRAM_ATTR baud_timer_handler(gptimer_handle_t timer, const gptimer_a
       bitcounter = 0;
 
       /* Wait for timeout */
+      ESP_LOGD("P1P2SERIAL", "Waiting for EOP");
       serial_state = wait_eop;
     }
     
