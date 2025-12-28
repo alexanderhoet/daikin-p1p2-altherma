@@ -10,9 +10,10 @@ class DaikinP1P2Altherma : public Component {
  public:
   void setup() override;
   void loop() override;
+  void dump_config() override;
 
   float get_setup_priority() const override {
-    return setup_priority::AFTER_CONNECTION;
+    return setup_priority::LATE;
   }
 
   void set_rx_pin(InternalGPIOPin *pin) { rx_pin_ = pin; }

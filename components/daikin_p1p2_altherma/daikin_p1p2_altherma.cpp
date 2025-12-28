@@ -12,25 +12,41 @@ namespace daikin_p1p2_altherma {
 static void message_print(P1P2_Message_t *message);
 
 void DaikinP1P2Altherma::setup() {
-  ESP_LOGI(TAG, "Setting up Daikin P1P2");
-  this->initialized_ = false;
+  ESP_LOGCONFIG(TAG, "Setting up Daikin P1P2...");
+  
+  if (!this->rx_pin_ || !this->tx_pin_ || !this->rst_pin_) {
+    ESP_LOGE(TAG, "Pins not configured!");
+    this->mark_failed();
+    this->initialized_ = false;
+    return;
+  }
+
+  if (p1p2_serial_init(rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin()) != P1P2_OK) {
+    ESP_LOGE(TAG, "P1P2 serial init failed");
+    this->mark_failed();
+    this->initialized_ = false;
+    return;
+  }
+
+  ESP_LOGCONFIG(TAG, "P1P2 serial initialized successfully");
+  this->initialized_ = true;
+}
+
+void DaikinP1P2Altherma::dump_config() {
+  ESP_LOGCONFIG(TAG, "Daikin P1P2 Altherma:");
+  LOG_PIN("  RX Pin: ", this->rx_pin_);
+  LOG_PIN("  TX Pin: ", this->tx_pin_);
+  LOG_PIN("  RST Pin: ", this->rst_pin_);
+  ESP_LOGCONFIG(TAG, "  Initialized: %s", YESNO(this->initialized_));
+  if (!this->initialized_) {
+    ESP_LOGE(TAG, "  Component failed to initialize!");
+  }
 }
 
 void DaikinP1P2Altherma::loop() {
   P1P2_Message_t rxmessage = {0};
-
+  
   if (!this->initialized_) {
-    ESP_LOGI(TAG, "Initializing P1P2");
-
-    ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin());
-
-    if (p1p2_serial_init(rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin()) != P1P2_OK) {
-      ESP_LOGE(TAG, "P1P2 serial init failed");
-      return;
-    }
-
-    ESP_LOGI(TAG, "P1P2 RX initialized");
-    this->initialized_ = true;
     return;
   }
 
