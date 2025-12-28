@@ -122,8 +122,13 @@ p1p2_err_t p1p2_serial_init(int8_t rx_pin, int8_t tx_pin, int8_t rst_pin)
     goto exit;
   }
 
-  /* Install the GPIO driver's ISR handler service */
-  CheckESPErrorOrExit(gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM));
+  /* Install the GPIO driver's ISR handler service (if not already installed by ESPHome) */
+  esp_err_t isr_err = gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM);
+  if(isr_err != ESP_OK && isr_err != ESP_ERR_INVALID_STATE) {
+    /* Only fail if it's an error other than "already installed" */
+    err = convert_esp_err(isr_err);
+    goto exit;
+  }
 
   /* Configure Home Bus RX pin */
   const gpio_config_t gpio_config_rx = {
@@ -321,7 +326,7 @@ static void p1p2_serial_transmit_task(void *argument)
 
       for(uint8_t i = 0; i < txmessage.datasize; i++)
           tx_data[tx_size++] = txmessage.data[i];
-
+wait_eop
       /* Calculate crc and add to end of transmit buffer */
       for(uint8_t i = 0; i < tx_size; i++)
             crc_accumulate(&crc, tx_data[i]);
@@ -366,7 +371,7 @@ static void byte_encode(uint8_t input, uint32_t *output)
 	/* Set the stop bit */
 	*output <<= 1;
 	*output |= 0x1;
-}
+}wait_eop
 
 static P1P2_MESSAGE_ERROR byte_decode(uint32_t input, uint8_t *output)
 {
