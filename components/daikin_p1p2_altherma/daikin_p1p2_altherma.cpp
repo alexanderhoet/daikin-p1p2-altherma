@@ -8,7 +8,6 @@ namespace daikin_p1p2_altherma {
 
 static const char *const TAG = "daikin_p1p2_altherma";
 
-// Forward declaration
 static void message_print(P1P2_Message_t *message);
 
 void DaikinP1P2Altherma::setup() {
@@ -19,9 +18,13 @@ void DaikinP1P2Altherma::setup() {
     return;
   }
 
-  const int rx = rx_pin_->get_pin();
-  const int tx = tx_pin_->get_pin();
-  const int rst = rst_pin_->get_pin();
+  //const int rx = rx_pin_->get_pin();
+  //const int tx = tx_pin_->get_pin();
+  //const int rst = rst_pin_->get_pin();
+
+  const int rx = 34;
+  const int tx = 33;
+  const int rst = 32;
 
   ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx, tx, rst);
 
