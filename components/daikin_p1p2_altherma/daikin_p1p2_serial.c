@@ -44,8 +44,8 @@
 #define PTX_QUEUE_SIZE          1
 #define RECEIVE_TASK_NAME       "P1P2 Receive"
 #define TRANSMIT_TASK_NAME      "P1P2 Transmit"
-#define TASK_STACK              2048
-#define TASK_PRIORITY           12
+#define TASK_STACK              8192
+#define TASK_PRIORITY           5
 #define EOP_CHAR                UINT32_MAX
 #define EOP_TIMEOUT             22
 
@@ -111,22 +111,16 @@ p1p2_err_t p1p2_serial_init(int8_t rx_pin, int8_t tx_pin, int8_t rst_pin)
   }
 
   /* Create the p1p2 serial receive task pinned to core 1 */
-  ESP_LOGI("P1P2SERIAL", "Creating receive task...");
   if(xTaskCreatePinnedToCore(p1p2_serial_receive_task, RECEIVE_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_receive_task, 1) != pdPASS) {
-    ESP_LOGE("P1P2SERIAL", "Failed to create receive task");
     err = P1P2_ERR_NO_MEM;
     goto exit;
   }
-  ESP_LOGI("P1P2SERIAL", "Receive task created");
 
   /* Create the p1p2 serial transmit task pinned to core 1 */
-  ESP_LOGI("P1P2SERIAL", "Creating transmit task...");
   if(xTaskCreatePinnedToCore(p1p2_serial_transmit_task, TRANSMIT_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_transmit_task, 1) != pdPASS) {
-    ESP_LOGE("P1P2SERIAL", "Failed to create transmit task");
     err = P1P2_ERR_NO_MEM;
     goto exit;
   }
-  ESP_LOGI("P1P2SERIAL", "Transmit task created");
 
 
   /* Install the GPIO driver's ISR handler service */
@@ -259,10 +253,10 @@ static void p1p2_serial_receive_task(void *argument)
   uint8_t rx_data[P1P2_MESSAGE_SIZE_MAX];
   P1P2_Message_t rxmessage = {0};
 
-  ESP_LOGI("P1P2SERIAL", "Receive task started on core %d", xPortGetCoreID());
+  ESP_LOGD("P1P2SERIAL", "Receive task started on core %d", xPortGetCoreID());
 
   for(;;) {
-    ESP_LOGI("P1P2SERIAL", "Waiting for data...");
+    ESP_LOGD("P1P2SERIAL", "Waiting for data...");
 
     /* Get a new byte off the receive queue */
     if(xQueueReceive(rxqueue, &input, 1000) == pdPASS) {
@@ -314,11 +308,11 @@ static void p1p2_serial_transmit_task(void *argument)
 {
   P1P2_Message_t txmessage = {0};
 
-  ESP_LOGI("P1P2SERIAL", "Transmit task started on core %d", xPortGetCoreID());
+  ESP_LOGD("P1P2SERIAL", "Transmit task started on core %d", xPortGetCoreID());
 
   for(;;) {
     /* Get a new message of the queue */
-    if(xQueueReceive(ptxqueue, &txmessage, portMAX_DELAY) == pdPASS) {
+    if(xQueueReceive(ptxqueue, &txmessage, 1000) == pdPASS) {
       uint8_t crc = 0;
       uint32_t output = 0;
       uint8_t tx_size = 0;
