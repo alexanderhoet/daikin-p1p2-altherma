@@ -11,6 +11,10 @@ namespace daikin_p1p2_altherma {
 
 static void message_print(P1P2_Message_t *message);
 
+DaikinP1P2Altherma::DaikinP1P2Altherma() {
+  ESP_LOGI(TAG, "Constructor called");
+}
+
 void DaikinP1P2Altherma::setup() {
   ESP_LOGI(TAG, "Setting up Daikin P1P2");
 

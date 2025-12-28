@@ -8,25 +8,16 @@ CONF_TX_PIN = "tx_pin"
 CONF_RST_PIN = "rst_pin"
 
 daikin_p1p2_altherma_ns = cg.esphome_ns.namespace("daikin_p1p2_altherma")
-DaikinP1P2Altherma = daikin_p1p2_altherma_ns.class_(
-    "DaikinP1P2Altherma", cg.Component
-)
+DaikinP1P2Altherma = daikin_p1p2_altherma_ns.class_("DaikinP1P2Altherma", cg.Component)
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(DaikinP1P2Altherma),
-    }
-).extend(cv.COMPONENT_SCHEMA)
-
-CONFIG_SCHEMA = cv.Schema(
-    {
-        cv.GenerateID(): cv.declare_id(DaikinP1P2Altherma),
-
         cv.Required(CONF_RX_PIN): pins.gpio_input_pin_schema,
         cv.Required(CONF_TX_PIN): pins.gpio_output_pin_schema,
         cv.Required(CONF_RST_PIN): pins.gpio_output_pin_schema,
     }
-).extend(cv.COMPONENT_SCHEMA)
+)
 
 async def to_code(config):
     cg.add_platformio_option(
