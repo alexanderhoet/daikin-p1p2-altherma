@@ -1,20 +1,17 @@
 #include "daikin_p1p2_altherma.h"
 #include "esphome/core/log.h"
 
-#include <p1p2_serial.h>
+#include <daikin_p1p2_serial.h>
 
 namespace esphome {
 
 namespace daikin_p1p2_altherma {
 
-static bool setup_called = false;
-
-static const char *const TAG = "daikin_p1p2_altherma";
+  static const char *const TAG = "daikin_p1p2_altherma";
 
 static void message_print(P1P2_Message_t *message);
 
 void DaikinP1P2Altherma::setup() {
-  setup_called = true;
   ESP_LOGI(TAG, "Setting up Daikin P1P2");
 
   if (!rx_pin_ || !tx_pin_ || !rst_pin_) {
@@ -46,7 +43,6 @@ void DaikinP1P2Altherma::loop() {
   if (p1p2_message_read(&rxmessage, 1) == P1P2_OK) {
     message_print(&rxmessage);
   }
-  ESP_LOGI(TAG, "setup_called = %s", setup_called ? "true" : "false");
 }
 
 static void message_print(P1P2_Message_t *message) {
