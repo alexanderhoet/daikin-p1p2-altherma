@@ -1,7 +1,7 @@
-#include "daikin_p1p2_altherma.h"
-#include "esphome/core/log.h"
+#include <esphome/core/log.h>
 
-#include <daikin_p1p2_serial.h>
+#include "daikin_p1p2_serial.h"
+#include "daikin_p1p2_altherma.h"
 
 namespace esphome {
 
