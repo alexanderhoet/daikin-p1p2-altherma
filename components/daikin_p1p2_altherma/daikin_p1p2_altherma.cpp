@@ -1,7 +1,7 @@
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-
 #include <esphome/core/log.h>
+
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
 
 #include "daikin_p1p2_serial.h"
 #include "daikin_p1p2_altherma.h"
@@ -10,7 +10,7 @@ namespace esphome {
 
 namespace daikin_p1p2_altherma {
 
-  static const char *const TAG = "daikin_p1p2_altherma";
+static const char *const TAG = "daikin_p1p2_altherma";
 
 static void message_print(P1P2_Message_t *message);
 static void task_fn(void *arg);
