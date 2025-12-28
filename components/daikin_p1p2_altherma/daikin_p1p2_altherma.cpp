@@ -11,10 +11,6 @@ namespace daikin_p1p2_altherma {
 
 static void message_print(P1P2_Message_t *message);
 
-DaikinP1P2Altherma::DaikinP1P2Altherma() {
-  ESP_LOGI(TAG, "Constructor called");
-}
-
 void DaikinP1P2Altherma::setup() {
   ESP_LOGI(TAG, "Setting up Daikin P1P2");
 
@@ -23,17 +19,9 @@ void DaikinP1P2Altherma::setup() {
     return;
   }
 
-  //const int rx = rx_pin_->get_pin();
-  //const int tx = tx_pin_->get_pin();
-  //const int rst = rst_pin_->get_pin();
+  ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin());
 
-  const int rx = 34;
-  const int tx = 33;
-  const int rst = 32;
-
-  ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx, tx, rst);
-
-  if (p1p2_serial_init(rx, tx, rst) != P1P2_OK) {
+  if (p1p2_serial_init(rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin()) != P1P2_OK) {
     ESP_LOGE(TAG, "P1P2 serial init failed");
     return;
   }
@@ -47,6 +35,9 @@ void DaikinP1P2Altherma::loop() {
   if (p1p2_message_read(&rxmessage, 1) == P1P2_OK) {
     message_print(&rxmessage);
   }
+
+  ESP_LOGI(TAG, "P1P2 pins RX=%d TX=%d RST=%d", rx_pin_->get_pin(), tx_pin_->get_pin(), rst_pin_->get_pin());
+
 }
 
 static void message_print(P1P2_Message_t *message) {
