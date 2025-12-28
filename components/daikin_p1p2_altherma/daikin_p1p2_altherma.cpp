@@ -35,9 +35,9 @@ void DaikinP1P2Altherma::setup() {
 void DaikinP1P2Altherma::dump_config() {
   ESP_LOGCONFIG(TAG, "Daikin P1P2 Altherma:");
   ESP_LOGCONFIG(TAG, "  Initialized: %s", YESNO(this->initialized_));
-  ESP_LOGCONFIG(TAG, "  RX Pin: ", this->rx_pin_->get_pin());
-  ESP_LOGCONFIG(TAG, "  TX Pin: ", this->tx_pin_->get_pin());
-  ESP_LOGCONFIG(TAG, "  RST Pin: ", this->rst_pin_->get_pin());
+  ESP_LOGCONFIG(TAG, "  RX Pin: %d", this->rx_pin_->get_pin());
+  ESP_LOGCONFIG(TAG, "  TX Pin: %d", this->tx_pin_->get_pin());
+  ESP_LOGCONFIG(TAG, "  RST Pin: %d", this->rst_pin_->get_pin());
 }
 
 void DaikinP1P2Altherma::loop() {
