@@ -110,25 +110,27 @@ p1p2_err_t p1p2_serial_init(int8_t rx_pin, int8_t tx_pin, int8_t rst_pin)
     goto exit;
   }
 
-  /* Create the p1p2 serial receive task */
-  if(xTaskCreate(p1p2_serial_receive_task, RECEIVE_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_receive_task) != pdPASS) {
+  /* Create the p1p2 serial receive task pinned to core 1 */
+  ESP_LOGI("P1P2SERIAL", "Creating receive task...");
+  if(xTaskCreatePinnedToCore(p1p2_serial_receive_task, RECEIVE_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_receive_task, 1) != pdPASS) {
+    ESP_LOGE("P1P2SERIAL", "Failed to create receive task");
     err = P1P2_ERR_NO_MEM;
     goto exit;
   }
+  ESP_LOGI("P1P2SERIAL", "Receive task created");
 
-  /* Create the p1p2 serial transmit task */
-  if(xTaskCreate(p1p2_serial_transmit_task, TRANSMIT_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_transmit_task) != pdPASS) {
+  /* Create the p1p2 serial transmit task pinned to core 1 */
+  ESP_LOGI("P1P2SERIAL", "Creating transmit task...");
+  if(xTaskCreatePinnedToCore(p1p2_serial_transmit_task, TRANSMIT_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_transmit_task, 1) != pdPASS) {
+    ESP_LOGE("P1P2SERIAL", "Failed to create transmit task");
     err = P1P2_ERR_NO_MEM;
     goto exit;
   }
+  ESP_LOGI("P1P2SERIAL", "Transmit task created");
 
-  /* Install the GPIO driver's ISR handler service (if not already installed by ESPHome) */
-  esp_err_t isr_err = gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM);
-  if(isr_err != ESP_OK && isr_err != ESP_ERR_INVALID_STATE) {
-    /* Only fail if it's an error other than "already installed" */
-    err = convert_esp_err(isr_err);
-    goto exit;
-  }
+
+  /* Install the GPIO driver's ISR handler service */
+  CheckESPErrorOrExit(gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM));
 
   /* Configure Home Bus RX pin */
   const gpio_config_t gpio_config_rx = {
@@ -257,8 +259,10 @@ static void p1p2_serial_receive_task(void *argument)
   uint8_t rx_data[P1P2_MESSAGE_SIZE_MAX];
   P1P2_Message_t rxmessage = {0};
 
+  ESP_LOGI("P1P2SERIAL", "Receive task started on core %d", xPortGetCoreID());
+
   for(;;) {
-    ESP_LOGD("P1P2SERIAL", "Waiting for data...");
+    ESP_LOGI("P1P2SERIAL", "Waiting for data...");
 
     /* Get a new byte off the receive queue */
     if(xQueueReceive(rxqueue, &input, 1000) == pdPASS) {
@@ -310,6 +314,8 @@ static void p1p2_serial_transmit_task(void *argument)
 {
   P1P2_Message_t txmessage = {0};
 
+  ESP_LOGI("P1P2SERIAL", "Transmit task started on core %d", xPortGetCoreID());
+
   for(;;) {
     /* Get a new message of the queue */
     if(xQueueReceive(ptxqueue, &txmessage, portMAX_DELAY) == pdPASS) {
@@ -326,7 +332,7 @@ static void p1p2_serial_transmit_task(void *argument)
 
       for(uint8_t i = 0; i < txmessage.datasize; i++)
           tx_data[tx_size++] = txmessage.data[i];
-wait_eop
+
       /* Calculate crc and add to end of transmit buffer */
       for(uint8_t i = 0; i < tx_size; i++)
             crc_accumulate(&crc, tx_data[i]);
@@ -371,7 +377,7 @@ static void byte_encode(uint8_t input, uint32_t *output)
 	/* Set the stop bit */
 	*output <<= 1;
 	*output |= 0x1;
-}wait_eop
+}
 
 static P1P2_MESSAGE_ERROR byte_decode(uint32_t input, uint8_t *output)
 {
@@ -471,6 +477,7 @@ static bool IRAM_ATTR baud_timer_handler(gptimer_handle_t timer, const gptimer_a
       bitcounter = 0;
 
       /* Wait for timeout */
+
       ESP_LOGD("P1P2SERIAL", "Waiting for EOP");
       serial_state = wait_eop;
     }
