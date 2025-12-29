@@ -44,8 +44,7 @@ void DaikinP1P2Altherma::setup() {
       5,
       nullptr,
       1
-    );
-  }
+  );
 }
 
 void DaikinP1P2Altherma::dump_config() {
