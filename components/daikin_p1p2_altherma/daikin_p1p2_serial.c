@@ -31,7 +31,7 @@
 #include <freertos/queue.h>
 #include <freertos/task.h>
 
-#include <esp_log.h>ESP_LOGD(TAG, "%s", buffer);
+#include <esp_log.h>
 #include <driver/gpio.h>
 #include <driver/gptimer.h>
 #include <hal/clk_tree_hal.h>
