@@ -91,9 +91,9 @@ p1p2_err_t p1p2_serial_init(int8_t rx_pin, int8_t tx_pin, int8_t rst_pin)
       task_fn,
       "my_task",
       8192,
-      nullptr,
+      NULL,
       5,
-      nullptr,
+      NULL,
       1
   );
 
@@ -555,7 +555,7 @@ static p1p2_err_t convert_esp_err(esp_err_t esp_err)
 static void task_fn(void *arg) {
   ESP_LOGI("my_task", "Started");
   while (true) {
-    ESP_LOGI("my_task", "Running");
+    ESP_LOGI("my_task", "Running1");
     vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
