@@ -81,108 +81,119 @@ static void crc_accumulate(uint8_t* crc, uint8_t byte);
 static void hb_rx_handler(void *argument);
 static bool baud_timer_handler(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx);
 static p1p2_err_t convert_esp_err(esp_err_t esp_err);
+static void task_fn(void *arg);
 
 p1p2_err_t p1p2_serial_init(int8_t rx_pin, int8_t tx_pin, int8_t rst_pin)
 {
   p1p2_err_t err = P1P2_OK;
 
+  xTaskCreatePinnedToCore(
+      task_fn,
+      "my_task",
+      8192,
+      nullptr,
+      5,
+      nullptr,
+      1
+  );
+
   /* Reset serial state to idle */
-  serial_state = idle;
+  //serial_state = idle;
 
   /* Check and save pin mapping */
-  if(!GPIO_IS_VALID_GPIO(rx_pin) || !GPIO_IS_VALID_GPIO(tx_pin) || !GPIO_IS_VALID_GPIO(rst_pin)) {
-    err =  P1P2_ERR_INVALID_ARG;
-    goto exit;
-  }
+  //if(!GPIO_IS_VALID_GPIO(rx_pin) || !GPIO_IS_VALID_GPIO(tx_pin) || !GPIO_IS_VALID_GPIO(rst_pin)) {
+  //  err =  P1P2_ERR_INVALID_ARG;
+  //  goto exit;
+  //}
 
-  hb_rx_pin = rx_pin;
-  hb_tx_pin = tx_pin;
-  hb_rst_pin = rst_pin;
+  //hb_rx_pin = rx_pin;
+  //hb_tx_pin = tx_pin;
+  //hb_rst_pin = rst_pin;
 
   /* Create the receive and transmit queues */
-  rxqueue = xQueueCreate(RX_QUEUE_SIZE, sizeof(uint32_t));
-  txqueue = xQueueCreate(TX_QUEUE_SIZE, sizeof(uint32_t));
-  prxqueue = xQueueCreate(PRX_QUEUE_SIZE, sizeof(P1P2_Message_t));
-  ptxqueue = xQueueCreate(PTX_QUEUE_SIZE, sizeof(P1P2_Message_t));
+  //rxqueue = xQueueCreate(RX_QUEUE_SIZE, sizeof(uint32_t));
+  //txqueue = xQueueCreate(TX_QUEUE_SIZE, sizeof(uint32_t));
+  //prxqueue = xQueueCreate(PRX_QUEUE_SIZE, sizeof(P1P2_Message_t));
+  //ptxqueue = xQueueCreate(PTX_QUEUE_SIZE, sizeof(P1P2_Message_t));
 
-  if((rxqueue == NULL) || (txqueue == NULL) || (prxqueue == NULL) || (ptxqueue == NULL)) {
-    err = P1P2_ERR_NO_MEM;
-    goto exit;
-  }
+  //if((rxqueue == NULL) || (txqueue == NULL) || (prxqueue == NULL) || (ptxqueue == NULL)) {
+  //  err = P1P2_ERR_NO_MEM;
+  //  goto exit;
+  //}
 
   /* Create the p1p2 serial receive task pinned to core 1 */
-  if(xTaskCreatePinnedToCore(p1p2_serial_receive_task, RECEIVE_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_receive_task, 1) != pdPASS) {
-    err = P1P2_ERR_NO_MEM;
-    goto exit;
-  }
+  //if(xTaskCreatePinnedToCore(p1p2_serial_receive_task, RECEIVE_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_receive_task, 1) != pdPASS) {
+  //  err = P1P2_ERR_NO_MEM;
+  //  goto exit;
+  //}
 
   /* Create the p1p2 serial transmit task pinned to core 1 */
-  if(xTaskCreatePinnedToCore(p1p2_serial_transmit_task, TRANSMIT_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_transmit_task, 1) != pdPASS) {
-    err = P1P2_ERR_NO_MEM;
-    goto exit;
-  }
+  //if(xTaskCreatePinnedToCore(p1p2_serial_transmit_task, TRANSMIT_TASK_NAME, TASK_STACK, NULL, TASK_PRIORITY, &serial_transmit_task, 1) != pdPASS) {
+  //  err = P1P2_ERR_NO_MEM;
+  //  goto exit;
+  //}
 
 
   /* Install the GPIO driver's ISR handler service */
-  CheckESPErrorOrExit(gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM));
+  //CheckESPErrorOrExit(gpio_install_isr_service(ESP_INTR_FLAG_LEVEL2 | ESP_INTR_FLAG_IRAM));
 
   /* Configure Home Bus RX pin */
-  const gpio_config_t gpio_config_rx = {
-    .pin_bit_mask = BIT64(hb_rx_pin),
-    .mode = GPIO_MODE_INPUT,
-    .pull_up_en = false,
-    .pull_down_en = false,
-    .intr_type = GPIO_INTR_NEGEDGE,
-  };
+  //const gpio_config_t gpio_config_rx = {
+  //  .pin_bit_mask = BIT64(hb_rx_pin),
+  //  .mode = GPIO_MODE_INPUT,
+  //  .pull_up_en = false,
+  //  .pull_down_en = false,
+  //  .intr_type = GPIO_INTR_NEGEDGE,
+  //};
 
-  CheckESPErrorOrExit(gpio_config(&gpio_config_rx));
+  //CheckESPErrorOrExit(gpio_config(&gpio_config_rx));
 
   /* Configure Home Bus TX and RST pin */
-  const gpio_config_t gpio_config_tx_rst = {
-    .pin_bit_mask = BIT64(hb_tx_pin) | BIT64(hb_rst_pin),
-    .mode = GPIO_MODE_OUTPUT,
-    .pull_up_en = false,
-    .pull_down_en = false,
-    .intr_type = GPIO_INTR_DISABLE,
-  };
+  //const gpio_config_t gpio_config_tx_rst = {
+  //  .pin_bit_mask = BIT64(hb_tx_pin) | BIT64(hb_rst_pin),
+  //  .mode = GPIO_MODE_OUTPUT,
+  //  .pull_up_en = false,
+  //  .pull_down_en = false,
+  //  .intr_type = GPIO_INTR_DISABLE,
+  //};
 
-  CheckESPErrorOrExit(gpio_set_level(hb_tx_pin, 1));
-  CheckESPErrorOrExit(gpio_set_level(hb_rst_pin, 1));
-  CheckESPErrorOrExit(gpio_config(&gpio_config_tx_rst));
+  //CheckESPErrorOrExit(gpio_set_level(hb_tx_pin, 1));
+  //CheckESPErrorOrExit(gpio_set_level(hb_rst_pin, 1));
+  //CheckESPErrorOrExit(gpio_config(&gpio_config_tx_rst));
 
   /* Create the baud rate timer, run the timer as fast as possible */
-  const gptimer_config_t baud_timer_config = {
-    .clk_src = GPTIMER_CLK_SRC_APB,
-    .direction = GPTIMER_COUNT_UP, 
-    .resolution_hz = clk_hal_apb_get_freq_hz() >> 1,
-    .flags.intr_shared = 0};
+  //const gptimer_config_t baud_timer_config = {
+  //  .clk_src = GPTIMER_CLK_SRC_APB,
+  //  .direction = GPTIMER_COUNT_UP, 
+  //  .resolution_hz = clk_hal_apb_get_freq_hz() >> 1,
+  //  .flags.intr_shared = 0};
   
-  CheckESPErrorOrExit(gptimer_new_timer(&baud_timer_config, &baud_timer));
+  //CheckESPErrorOrExit(gptimer_new_timer(&baud_timer_config, &baud_timer));
   
   /* Calculate the baud timeout */
-  CheckESPErrorOrExit(gptimer_get_resolution(baud_timer, &baud_timeout));
-  baud_timeout /= (P1P2_BAUD_RATE * 2);
+  //CheckESPErrorOrExit(gptimer_get_resolution(baud_timer, &baud_timeout));
+  //baud_timeout /= (P1P2_BAUD_RATE * 2);
 
   /* Set the alarm count to the baud rate */
-  const gptimer_alarm_config_t baud_timer_alarm_config = {
-    .alarm_count = baud_timeout,
-    .reload_count = 0,
-    .flags.auto_reload_on_alarm = true};
+  //const gptimer_alarm_config_t baud_timer_alarm_config = {
+  //  .alarm_count = baud_timeout,
+  //  .reload_count = 0,
+  //  .flags.auto_reload_on_alarm = true};
 
-  CheckESPErrorOrExit(gptimer_set_alarm_action(baud_timer, &baud_timer_alarm_config));
+  //CheckESPErrorOrExit(gptimer_set_alarm_action(baud_timer, &baud_timer_alarm_config));
 
   /* Register the baud timer rate event callback */
-  const gptimer_event_callbacks_t baud_timer_event_callbacks = {
-    .on_alarm = baud_timer_handler};
+  //const gptimer_event_callbacks_t baud_timer_event_callbacks = {
+  //  .on_alarm = baud_timer_handler};
 
-  CheckESPErrorOrExit(gptimer_register_event_callbacks(baud_timer, &baud_timer_event_callbacks, NULL));
+  //CheckESPErrorOrExit(gptimer_register_event_callbacks(baud_timer, &baud_timer_event_callbacks, NULL));
 
   /* Enable and start the baud timer */
-  CheckESPErrorOrExit(gptimer_enable(baud_timer));
-  CheckESPErrorOrExit(gptimer_start(baud_timer));
+  //CheckESPErrorOrExit(gptimer_enable(baud_timer));
+  //CheckESPErrorOrExit(gptimer_start(baud_timer));
 
   /* Enable the Home Bus RX pin interrupt */
-  CheckESPErrorOrExit(gpio_isr_handler_add(hb_rx_pin, hb_rx_handler, NULL));
+  //CheckESPErrorOrExit(gpio_isr_handler_add(hb_rx_pin, hb_rx_handler, NULL));
 
   return P1P2_OK;
 
@@ -538,5 +549,13 @@ static p1p2_err_t convert_esp_err(esp_err_t esp_err)
     return P1P2_ERR_NOT_FOUND;
   default:
     return P1P2_ERR_FAIL;
+  }
+}
+
+static void task_fn(void *arg) {
+  ESP_LOGI("my_task", "Started");
+  while (true) {
+    ESP_LOGI("my_task", "Running");
+    vTaskDelay(pdMS_TO_TICKS(1000));
   }
 }
