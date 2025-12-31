@@ -32,28 +32,28 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 
-#define P1P2_BAUD_RATE               	9600
+// #define P1P2_BAUD_RATE               	9600
 
-#define P1P2_MESSAGE_SIZE_MIN   		4
-#define P1P2_MESSAGE_SIZE_MAX   		24
+// #define P1P2_MESSAGE_SIZE_MIN   		4
+// #define P1P2_MESSAGE_SIZE_MAX   		24
 
-#define P1P2_MESSAGE_ERROR_NONE         0
-#define P1P2_MESSAGE_ERROR_PARITY       1
-#define P1P2_MESSAGE_ERROR_START_BIT    2
-#define P1P2_MESSAGE_ERROR_STOP_BIT     4
-#define P1P2_MESSAGE_ERROR_FRAMING      8
-#define P1P2_MESSAGE_ERROR_CRC          16
+// #define P1P2_MESSAGE_ERROR_NONE         0
+// #define P1P2_MESSAGE_ERROR_PARITY       1
+// #define P1P2_MESSAGE_ERROR_START_BIT    2
+// #define P1P2_MESSAGE_ERROR_STOP_BIT     4
+// #define P1P2_MESSAGE_ERROR_FRAMING      8
+// #define P1P2_MESSAGE_ERROR_CRC          16
 
-typedef uint8_t P1P2_MESSAGE_ERROR;
+// typedef uint8_t P1P2_MESSAGE_ERROR;
 
-typedef struct {
-    uint8_t direction;
-	uint8_t deviceid;
-	uint8_t messageid;
-	uint8_t data[P1P2_MESSAGE_SIZE_MAX];
-	uint8_t datasize;
-    P1P2_MESSAGE_ERROR error_flags;
-} P1P2_Message_t;
+// typedef struct {
+//     uint8_t direction;
+// 	uint8_t deviceid;
+// 	uint8_t messageid;
+// 	uint8_t data[P1P2_MESSAGE_SIZE_MAX];
+// 	uint8_t datasize;
+//     P1P2_MESSAGE_ERROR error_flags;
+// } P1P2_Message_t;
 
 #define P1P2_OK                   0   /*!< esp_err_t value indicating success (no error) */
 #define P1P2_ERR_FAIL             1   /*!< Generic esp_err_t code indicating failure */
@@ -95,7 +95,7 @@ p1p2_err_t p1p2_serial_init(int8_t hb_rx_pin, int8_t hb_tx_pin, int8_t hb_rst_pi
  * @return `p1p2_err_t` error code, always returns `P1P2_OK`
  * 
  */
-p1p2_err_t p1p2_serial_deinit(void);
+// p1p2_err_t p1p2_serial_deinit(void);
 
 /**
  * Read a new message from the message queue
@@ -110,7 +110,7 @@ p1p2_err_t p1p2_serial_deinit(void);
  *  - `P1P2_ERR_TIMEOUT`: No new message has been received
  * 
  */
-p1p2_err_t p1p2_message_read(P1P2_Message_t *message, uint32_t timeout);
+// p1p2_err_t p1p2_message_read(P1P2_Message_t *message, uint32_t timeout);
 
 /**
  * Write a new message to the message queue
@@ -125,7 +125,7 @@ p1p2_err_t p1p2_message_read(P1P2_Message_t *message, uint32_t timeout);
  *  - `P1P2_ERR_TIMEOUT`: Message could not be placed on the queue
  * 
  */
-p1p2_err_t p1p2_message_write(P1P2_Message_t *message, uint32_t timeout);
+// p1p2_err_t p1p2_message_write(P1P2_Message_t *message, uint32_t timeout);
 
 #ifdef __cplusplus
 }

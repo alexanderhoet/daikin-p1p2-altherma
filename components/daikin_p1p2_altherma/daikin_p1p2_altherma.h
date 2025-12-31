@@ -20,8 +20,7 @@ class DaikinP1P2Altherma : public Component {
   void set_tx_pin(InternalGPIOPin *pin) { tx_pin_ = pin; }
   void set_rst_pin(InternalGPIOPin *pin) { rst_pin_ = pin; }
 
- protected:
-  bool initialized_{false};
+ private:
   InternalGPIOPin *rx_pin_{nullptr};
   InternalGPIOPin *tx_pin_{nullptr};
   InternalGPIOPin *rst_pin_{nullptr};
