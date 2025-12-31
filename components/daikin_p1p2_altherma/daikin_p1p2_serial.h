@@ -25,9 +25,9 @@
 #ifndef P1P2_SERIAL_H_
 #define P1P2_SERIAL_H_
 
-#ifdef __cplusplus
+//#ifdef __cplusplus
 extern "C" {
-#endif
+//#endif
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -127,8 +127,8 @@ p1p2_err_t p1p2_serial_init(int8_t hb_rx_pin, int8_t hb_tx_pin, int8_t hb_rst_pi
  */
 // p1p2_err_t p1p2_message_write(P1P2_Message_t *message, uint32_t timeout);
 
-#ifdef __cplusplus
+//#ifdef __cplusplus
 }
-#endif
+//#endif
 
 #endif /* P1P2_SERIAL_H_ */
